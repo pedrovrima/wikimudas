@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           Int    @id @default(autoincrement())
+  name         String
+  organization String
+  role         Roles  @default(USER)
+}
+
+model Reference {
+  id      Int    @id @default(autoincrement())
+  type    String
+  authors String
+  title   String
+
+
+}
+
+model Family {
+  id        Int    @id @default(autoincrement())
+  name      String
+  primaries Int
+}
+
+model Species {
+  id       Int        @id @default(autoincrement())
+  genus    String
+  species  String
+  pt_name  String
+  strategy Strategy[]
+  skull    Skull[]
+
+  molts Molts[]
+}
+
+model Strategy {
+  id        Int        @id @default(autoincrement())
+  species   Species    @relation(fields: [speciesId], references: [id])
+  speciesId Int
+  strategy  Strategies
+}
+
+model Skull {
+  id        Int        @id @default(autoincrement())
+  species   Species    @relation(fields: [speciesId], references: [id])
+  speciesId Int
+  strategy  Strategies
+}
+
+model Molts {
+  id        Int        @id @default(autoincrement())
+  species   Species    @relation(fields: [speciesId], references: [id])
+  speciesId Int
+  molt      MoltNames
+  extension Extensions
+}
+
+
+
+
+
+enum MoltNames {
+  FPJ
+  FPF
+  FPA
+  DPB
+  DPA
+}
+
+enum Extensions {
+  Absent
+  Limited
+  Partial
+  Incomplete
+
+}
+
+enum Strategies {
+  CBS
+  CAS
+  SBS
+  SAS
+}
+
+enum Roles {
+  USER
+  ADMIN
+}
