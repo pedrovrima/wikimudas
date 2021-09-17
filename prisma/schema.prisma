@@ -15,21 +15,42 @@ model User {
   name         String
   organization String
   role         Roles  @default(USER)
+  author ChangeLogs[] @relation(name: "author")
+  editor ChangeLogs[] @relation(name:"editor")
 }
 
 model Reference {
-  id      Int    @id @default(autoincrement())
-  type    String
-  authors String
-  title   String
-
-
+  id         Int          @id @default(autoincrement())
+  type       String
+  authors    String
+  title      String
+  location   String
+  changelog  ChangeLogs   @relation(fields: [changeId], references: [id])
+  changeId   Int
+  isDeleted  Boolean
+  status     Status
+  Family     Family[]
+  Species    Species[]
+  Strategy   Strategy[]
+  Skull      Skull[]
+  Molts      Molts[]
+  MoltLimits MoltLimits[]
+  Sex        Sex[]
+  Ages       Ages[]
 }
 
 model Family {
-  id        Int    @id @default(autoincrement())
-  name      String
-  primaries Int
+  id          Int        @id @default(autoincrement())
+  name        String
+  primaries   Int
+  changelog   ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId    Int
+  isDeleted   Boolean
+  reference   Reference  @relation(fields: [referenceId], references: [id])
+  referenceId Int
+  status      Status
+
+
 }
 
 model Species {
@@ -40,34 +61,141 @@ model Species {
   strategy Strategy[]
   skull    Skull[]
 
-  molts Molts[]
+  molts       Molts[]
+  changelog   ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId    Int
+  isDeleted   Boolean
+  reference   Reference  @relation(fields: [referenceId], references: [id])
+  referenceId Int
+  status      Status
+
+  MoltLimits MoltLimits[]
+  Ages       Ages[]
 }
 
 model Strategy {
-  id        Int        @id @default(autoincrement())
-  species   Species    @relation(fields: [speciesId], references: [id])
-  speciesId Int
-  strategy  Strategies
+  id          Int        @id @default(autoincrement())
+  species     Species    @relation(fields: [speciesId], references: [id])
+  speciesId   Int
+  strategy    Strategies
+  changelog   ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId    Int
+  isDeleted   Boolean
+  reference   Reference  @relation(fields: [referenceId], references: [id])
+  referenceId Int
+  status      Status
+
 }
 
 model Skull {
-  id        Int        @id @default(autoincrement())
-  species   Species    @relation(fields: [speciesId], references: [id])
-  speciesId Int
-  strategy  Strategies
+  id          Int        @id @default(autoincrement())
+  species     Species    @relation(fields: [speciesId], references: [id])
+  speciesId   Int
+  strategy    Strategies
+  changelog   ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId    Int
+  isDeleted   Boolean
+  reference   Reference  @relation(fields: [referenceId], references: [id])
+  referenceId Int
+  status      Status
+
 }
 
 model Molts {
-  id        Int        @id @default(autoincrement())
-  species   Species    @relation(fields: [speciesId], references: [id])
-  speciesId Int
-  molt      MoltNames
-  extension Extensions
+  id          Int        @id @default(autoincrement())
+  species     Species    @relation(fields: [speciesId], references: [id])
+  speciesId   Int
+  molt        MoltNames
+  extension   Extensions
+  changelog   ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId    Int
+  isDeleted   Boolean
+  reference   Reference  @relation(fields: [referenceId], references: [id])
+  referenceId Int
+  status      Status
+
 }
 
+model MoltLimits {
+  id          Int             @id @default(autoincrement())
+  species     Species         @relation(fields: [speciesId], references: [id])
+  speciesId   Int
+  type        MoltLimitsTypes
+  changelog   ChangeLogs      @relation(fields: [changeId], references: [id])
+  changeId    Int
+  isDeleted   Boolean
+  reference   Reference       @relation(fields: [referenceId], references: [id])
+  referenceId Int
+  status      Status
 
+}
 
+model Sex {
+  id Int @id @default(autoincrement())
 
+  age             Ages       @relation(fields: [ageId], references: [id])
+  ageId           Int
+  tract           Traits
+  characteristics String
+  changelog       ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId        Int
+  isDeleted       Boolean
+  reference       Reference  @relation(fields: [referenceId], references: [id])
+  referenceId     Int
+  status          Status
+
+}
+
+model Ages {
+  id          Int        @id @default(autoincrement())
+  species     Species    @relation(fields: [speciesId], references: [id])
+  speciesId   Int
+  age         ValidAges
+  Sex         Sex[]
+  changelog   ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId    Int
+  isDeleted   Boolean
+  reference   Reference  @relation(fields: [referenceId], references: [id])
+  referenceId Int
+  status      Status
+
+}
+
+model ChangeLogs {
+  id       Int        @id @default(autoincrement())
+  //  Author
+  author   User       @relation(name:"author",fields: [authorId], references: [id])
+  authorId Int
+  editor   User       @relation(name:"editor",fields: [editorId], references: [id])
+  editorId Int
+  // Editor
+  table    String
+  row_id   Int
+  status   Status
+  type     ChangeType
+
+  Molts      Molts[]
+  Reference  Reference[]
+  Family     Family[]
+  Species    Species[]
+  Strategy   Strategy[]
+  Skull      Skull[]
+  MoltLimits MoltLimits[]
+  Sex        Sex[]
+  Ages       Ages[]
+}
+
+enum ChangeType {
+  CREATE
+  DELETE
+  UPDATE
+}
+
+enum Status {
+  APPROVED
+  REJECTED
+  PENDING
+}
 
 enum MoltNames {
   FPJ
@@ -95,4 +223,52 @@ enum Strategies {
 enum Roles {
   USER
   ADMIN
+}
+
+enum MoltLimitsTypes {
+  g_covs
+  versus
+  alula
+  primaries
+  secondaries
+  pp_covs
+
+}
+
+enum Traits {
+  crown
+  bill
+  iris
+  greater_coverts
+  lesser_coverts
+  median_covers
+  secondaries
+  primaries
+
+}
+
+enum ValidAges {
+  FCJ
+  FAJ
+  FCF
+  FCA
+  SCB
+  SAB
+  SCA
+  TCB
+  TAB
+  TCA
+  QCB
+  QAB
+  QCA
+  CCB
+  CAB
+  CCA
+
+}
+
+enum ValidSex {
+  Male
+  Female
+  Undertemined
 }
