@@ -16,7 +16,7 @@ import { useForm, Controller } from "react-hook-form";
 
 
 export default function MoltForm(props) {
-  const { references } = props;
+  const { references, mutate } = props;
   function onSubmit(values) {
     const data = {data:{type:"CREATE",table:"molts",authorId:1},datatable:{...values,speciesId:1}}
     console.log(values)
@@ -25,6 +25,7 @@ export default function MoltForm(props) {
       await  fetch("/api/sender",{method: "post",body:JSON.stringify(({changes:[data]}))})
       ;
         resolve();
+        mutate()
       });
     ;
   }

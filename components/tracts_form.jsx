@@ -6,26 +6,37 @@ import {
   Select,
   Input,
   Button,
-  Container
+  Container, 
+  Textarea
 } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
+import useSWR from "swr";
+const fetcher = url => fetch(url).then(res => res.json());
 
-export default function StrategyForm(props) {
-  const { references, mutate } = props;
+
+
+
+
+
+export default function TractForm(props) {
+  const { references, mutate, sexId } = props;
+  const { data, error } = useSWR("/api/tracts", fetcher);
+  console.log(props)
+
   function onSubmit(values) {
-    const data = {data:{type:"CREATE",table:"strategy",authorId:1},datatable:{...values,speciesId:1}}
+    const data = {data:{type:"CREATE",table:"ageSexTraits",authorId:1},datatable:{...values,sexId}}
     console.log(values)
     return new Promise(async resolve => {
       
       await  fetch("/api/sender",{method: "post",body:JSON.stringify(({changes:[data]}))})
       ;
-        await mutate()
-        resolve();
+      await       mutate()
 
+      resolve();
       });
     ;
   }
-
+  
   const {
     register,
     handleSubmit,
@@ -33,29 +44,47 @@ export default function StrategyForm(props) {
   } = useForm();
 
   return (
+    <>
+    {data? 
     <div>
       <Container>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <FormControl isInvalid={errors.type}>
-            <FormLabel>Estratégia</FormLabel>
+          <FormControl isInvalid={errors.tractId}>
+            <FormLabel>Parte</FormLabel>
             <Select
-              {...register("strategy", { required: "Necessário" })}
+              {...register("tractId", {valueAsNumber:true, required: "Necessário" })}
               placeholder="Selecione"
             >
-              <option value="CBS">Complexa Básica</option>
-              <option value="CAS">Complexa Alterna</option>
-              <option value="SBS">Simples Básica</option>
-              <option value="SAS">Simples Alterna</option>
+                  {data.map((ml, i) =>
+                    <option key={i} value={+ml.id}>
+                      {ml.pt_name}
+                    </option>
+                  )}
             </Select>
             <FormErrorMessage>
-              {errors.type && errors.type.message}
+              {errors.tractId && errors.tractId.message}
             </FormErrorMessage>
           </FormControl>
+
+
+                              <FormControl isInvalid={errors.characteristics}>
+            <FormLabel>Descrição</FormLabel>
+            <Textarea
+              {...register("characteristics", {required: "Necessário" })}
+              
+            >
+            </Textarea>
+            <FormErrorMessage>
+              {errors.characteristics && errors.characteristics.message}
+            </FormErrorMessage>
+          </FormControl>
+
+
 
           <FormControl isInvalid={errors.type}>
             <FormLabel>Referência</FormLabel>
             <Select
-              {...register("referenceId", { valueAsNumber:true,required: "Necessário" })}
+              {...register("referenceId", {valueAsNumber:true, required: "Necessário" })}
               placeholder="Selecione"
             >
               {references.map((ref, i) => {
@@ -75,6 +104,6 @@ export default function StrategyForm(props) {
           </Button>
         </form>
       </Container>
-    </div>
+    </div>:""}</>
   );
 }

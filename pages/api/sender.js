@@ -7,7 +7,6 @@ import prisma from "../../lib/prisms"
 
 export default async function send_data(req, res) {
   const data = JSON.parse(req.body);
-  console.log(data);
   // run this for all changesb
   await data.changes.map(async (chang) => {
     // create changelog

@@ -10,10 +10,10 @@ import {
 } from "@chakra-ui/react";
 import { useForm, Controller } from "react-hook-form";
 
-export default function StrategyForm(props) {
-  const { references, mutate } = props;
+export default function SexForm(props) {
+  const { references, mutate, ageId } = props;
   function onSubmit(values) {
-    const data = {data:{type:"CREATE",table:"strategy",authorId:1},datatable:{...values,speciesId:1}}
+    const data = {data:{type:"CREATE",table:"sex",authorId:1},datatable:{...values,ageId}}
     console.log(values)
     return new Promise(async resolve => {
       
@@ -37,22 +37,22 @@ export default function StrategyForm(props) {
       <Container>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormControl isInvalid={errors.type}>
-            <FormLabel>Estratégia</FormLabel>
+            <FormLabel>Sexo</FormLabel>
             <Select
-              {...register("strategy", { required: "Necessário" })}
+              {...register("sex", { required: "Necessário" })}
               placeholder="Selecione"
             >
-              <option value="CBS">Complexa Básica</option>
-              <option value="CAS">Complexa Alterna</option>
-              <option value="SBS">Simples Básica</option>
-              <option value="SAS">Simples Alterna</option>
+              <option value="Male">Macho</option>
+              <option value="Female">Fêmea</option>
+              <option value="Unknown">Indeterminado</option>
+              
             </Select>
             <FormErrorMessage>
-              {errors.type && errors.type.message}
+              {errors.sex && errors.sex.message}
             </FormErrorMessage>
           </FormControl>
 
-          <FormControl isInvalid={errors.type}>
+          <FormControl isInvalid={errors.sex}>
             <FormLabel>Referência</FormLabel>
             <Select
               {...register("referenceId", { valueAsNumber:true,required: "Necessário" })}

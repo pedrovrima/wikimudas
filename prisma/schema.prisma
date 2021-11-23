@@ -17,7 +17,10 @@ model User {
   role         Roles        @default(USER)
   author       ChangeLogs[] @relation(name: "author")
   editor       ChangeLogs[] @relation(name: "editor")
-  Picture      Picture[]
+  del_author   DeleteLogs[] @relation(name: "del_author")
+  del_editor   DeleteLogs[] @relation(name: "del_editor")
+
+  Picture Picture[]
 }
 
 model Picture {
@@ -54,8 +57,8 @@ model Reference {
   location  String
   changelog ChangeLogs @relation(fields: [changeId], references: [id])
   changeId  Int
-  isDeleted Boolean    @default(false)
-  oldId     Int?
+
+  oldId Int?
 
   Family       Family[]
   Strategy     Strategy[]
@@ -65,23 +68,27 @@ model Reference {
   Sex          Sex[]
   AgeSexTraits AgeSexTraits[]
   Ages         Ages[]
+  deleteLogs   DeleteLogs?    @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId Int?
 }
 
 model Family {
-  id          Int        @id @default(autoincrement())
-  name        String
-  primaries   Int
-  changelog   ChangeLogs @relation(fields: [changeId], references: [id])
-  changeId    Int
-  isDeleted   Boolean    @default(false)
+  id        Int        @id @default(autoincrement())
+  name      String
+  primaries Int
+  changelog ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId  Int
+
   oldId       Int?
-  reference   Reference  @relation(fields: [referenceId], references: [id])
+  reference   Reference @relation(fields: [referenceId], references: [id])
   referenceId Int
 
 
 
   pictureReference   PictureReference? @relation(fields: [pictureReferenceId], references: [id])
   pictureReferenceId Int?
+  deleteLogs         DeleteLogs?       @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId       Int?
 }
 
 model Species {
@@ -95,14 +102,16 @@ model Species {
   molts     Molts[]
   changelog ChangeLogs? @relation(fields: [changeId], references: [id])
   changeId  Int?
-  isDeleted Boolean     @default(false)
-  oldId     Int?
+
+  oldId Int?
 
 
   moltLimits MoltLimits[]
   ages       Ages[]
   picture    Picture[]
 
+  deleteLogs   DeleteLogs? @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId Int?
 }
 
 model Strategy {
@@ -111,7 +120,7 @@ model Strategy {
   speciesId   Int
   changelog   ChangeLogs @relation(fields: [changeId], references: [id])
   changeId    Int
-  isDeleted   Boolean    @default(false)
+  strategy    Strategies
   oldId       Int?
   reference   Reference  @relation(fields: [referenceId], references: [id])
   referenceId Int
@@ -119,6 +128,8 @@ model Strategy {
 
   pictureReference   PictureReference? @relation(fields: [pictureReferenceId], references: [id])
   pictureReferenceId Int?
+  deleteLogs         DeleteLogs?       @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId       Int?
 }
 
 model Skull {
@@ -128,32 +139,36 @@ model Skull {
   description String
   changelog   ChangeLogs @relation(fields: [changeId], references: [id])
   changeId    Int
-  isDeleted   Boolean    @default(false)
+
   oldId       Int?
-  reference   Reference  @relation(fields: [referenceId], references: [id])
+  reference   Reference @relation(fields: [referenceId], references: [id])
   referenceId Int
 
 
   pictureReference   PictureReference? @relation(fields: [pictureReferenceId], references: [id])
   pictureReferenceId Int?
+  deleteLogs         DeleteLogs?       @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId       Int?
 }
 
 model Molts {
-  id          Int        @id @default(autoincrement())
-  species     Species    @relation(fields: [speciesId], references: [id])
-  speciesId   Int
-  molt        MoltNames
-  extension   Extensions
-  changelog   ChangeLogs @relation(fields: [changeId], references: [id])
-  changeId    Int
-  isDeleted   Boolean    @default(false)
+  id        Int        @id @default(autoincrement())
+  species   Species    @relation(fields: [speciesId], references: [id])
+  speciesId Int
+  molt      MoltNames
+  extension Extensions
+  changelog ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId  Int
+
   oldId       Int?
-  reference   Reference  @relation(fields: [referenceId], references: [id])
+  reference   Reference @relation(fields: [referenceId], references: [id])
   referenceId Int
 
 
   pictureReference   PictureReference? @relation(fields: [pictureReferenceId], references: [id])
   pictureReferenceId Int?
+  deleteLogs         DeleteLogs?       @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId       Int?
 }
 
 model MoltLimits {
@@ -164,14 +179,16 @@ model MoltLimits {
   moltLimitId Int
   changelog   ChangeLogs       @relation(fields: [changeId], references: [id])
   changeId    Int
-  isDeleted   Boolean          @default(false)
+
   oldId       Int?
-  reference   Reference        @relation(fields: [referenceId], references: [id])
+  reference   Reference @relation(fields: [referenceId], references: [id])
   referenceId Int
 
 
   pictureReference   PictureReference? @relation(fields: [pictureReferenceId], references: [id])
   pictureReferenceId Int?
+  deleteLogs         DeleteLogs?       @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId       Int?
 }
 
 model Sex {
@@ -181,48 +198,55 @@ model Sex {
   ageId              Int
   changelog          ChangeLogs        @relation(fields: [changeId], references: [id])
   changeId           Int
-  isDeleted          Boolean           @default(false)
+  sex                ValidSex
   oldId              Int?
   reference          Reference         @relation(fields: [referenceId], references: [id])
   referenceId        Int
   pictureReference   PictureReference? @relation(fields: [pictureReferenceId], references: [id])
   pictureReferenceId Int?
   ageSexTraits       AgeSexTraits[]
+  deleteLogs         DeleteLogs?       @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId       Int?
 }
 
 model Ages {
-  id                 Int               @id @default(autoincrement())
-  species            Species           @relation(fields: [speciesId], references: [id])
-  speciesId          Int
-  age                ValidAges
-  sex                Sex[]
-  changelog          ChangeLogs        @relation(fields: [changeId], references: [id])
-  changeId           Int
-  isDeleted          Boolean           @default(false)
+  id        Int        @id @default(autoincrement())
+  species   Species    @relation(fields: [speciesId], references: [id])
+  speciesId Int
+  age       AgeOptions @relation(fields: [ageId], references: [id])
+  ageId     Int
+  sex       Sex[]
+  changelog ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId  Int
+
   oldId              Int?
   reference          Reference?        @relation(fields: [referenceId], references: [id])
   referenceId        Int?
   pictureReference   PictureReference? @relation(fields: [pictureReferenceId], references: [id])
   pictureReferenceId Int?
 
+  deleteLogs   DeleteLogs? @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId Int?
 }
 
 model AgeSexTraits {
-  tract              Tracts            @relation(fields: [tractId], references: [id])
-  tractId            Int
-  characteristics    String
-  id                 Int               @id @default(autoincrement())
-  sex                Sex               @relation(fields: [sexId], references: [id])
-  sexId              Int
-  changelog          ChangeLogs        @relation(fields: [changeId], references: [id])
-  changeId           Int
-  isDeleted          Boolean           @default(false)
+  tract           Tracts     @relation(fields: [tractId], references: [id])
+  tractId         Int
+  characteristics String
+  id              Int        @id @default(autoincrement())
+  sex             Sex        @relation(fields: [sexId], references: [id])
+  sexId           Int
+  changelog       ChangeLogs @relation(fields: [changeId], references: [id])
+  changeId        Int
+
   oldId              Int?
   reference          Reference         @relation(fields: [referenceId], references: [id])
   referenceId        Int
   pictureReference   PictureReference? @relation(fields: [pictureReferenceId], references: [id])
   pictureReferenceId Int?
 
+  deleteLogs   DeleteLogs? @relation(fields: [deleteLogsId], references: [id])
+  deleteLogsId Int?
 }
 
 model Tracts {
@@ -245,16 +269,40 @@ model ChangeLogs {
   status   Status     @default(PENDING)
   type     ChangeType
 
-  Molts        Molts[]
-  Reference    Reference[]
-  Family       Family[]
-  Species      Species[]
-  Strategy     Strategy[]
-  Skull        Skull[]
-  MoltLimits   MoltLimits[]
-  Sex          Sex[]
-  Ages         Ages[]
-  AgeSexTraits AgeSexTraits[]
+  molts        Molts[]
+  reference    Reference[]
+  family       Family[]
+  species      Species[]
+  strategy     Strategy[]
+  skull        Skull[]
+  moltLimits   MoltLimits[]
+  sex          Sex[]
+  ages         Ages[]
+  ageSexTraits AgeSexTraits[]
+}
+
+model DeleteLogs {
+  id       Int    @id @default(autoincrement())
+  //  Author
+  author   User   @relation(name: "del_author", fields: [authorId], references: [id])
+  authorId Int
+  editor   User?  @relation(name: "del_editor", fields: [editorId], references: [id])
+  editorId Int?
+  // Editor
+  table    String
+  row_id   Int?
+  status   Status @default(PENDING)
+
+  molts        Molts[]
+  reference    Reference[]
+  family       Family[]
+  species      Species[]
+  strategy     Strategy[]
+  skull        Skull[]
+  moltLimits   MoltLimits[]
+  sex          Sex[]
+  ages         Ages[]
+  ageSexTraits AgeSexTraits[]
 }
 
 model MoltLimitOptions {
@@ -262,6 +310,12 @@ model MoltLimitOptions {
   molt_limit_type String
   pt_name         String
   MoltLimits      MoltLimits[]
+}
+
+model AgeOptions {
+  id       Int    @id @default(autoincrement())
+  age_type String
+  Ages     Ages[]
 }
 
 enum ChangeType {
